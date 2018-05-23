@@ -1,3 +1,7 @@
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+
 #include "Core"
 #include "LU"
 #include "Cholesky"
@@ -5,3 +9,5 @@
 #include "SVD"
 #include "Geometry"
 #include "Eigenvalues"
+
+#pragma GCC diagnostic pop

@@ -5,7 +5,7 @@
 // Routines for single molecule analysis
 //
 // Author   : Ismael Gómez García
-// Email    : 
+// Email    :
 // Date     : November 27th 2015
 
 #ifndef _OMS_H_

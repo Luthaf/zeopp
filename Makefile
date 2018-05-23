@@ -5,7 +5,7 @@
 CC = g++
 
 #Flags to compile with
-CFLAGS = -g #-fPIC
+CFLAGS = -g -O3
 CFLAGS_DYLIB = -fPIC
 
 UNAME_S := $(shell uname -s)
@@ -16,11 +16,10 @@ else ifeq ($(UNAME_S),Darwin)
 endif
 
 #Libraries to use while compiling
-LIB = -lvoro++
+LIB=voro++/src/libvoro++.a
 
 # The relative of path of the main library source files
-VOROINCLDIR = -Ivoro++/src 
-VOROLINKDIR = -Lvoro++/src
+VOROINCLDIR = -Ivoro++/src
 
 #Object files to be created for network
 MAIN_OBJ = main.o
@@ -102,34 +101,38 @@ INCS = network.h \
   OMS.hh
 
 # List of executables
-EXECUTABLES = network framework_builder molecule_to_abstract
-
-DY_LIB = libzeo++.so
-
-STATIC_LIB = libzeo++.a
+# EXECUTABLES = network framework_builder molecule_to_abstract
+#
+# DY_LIB = libzeo++.so
+#
+# STATIC_LIB = libzeo++.a
 
 # Makefile rules
-all: network framework_builder molecule_to_abstract
+all: zeopp
+# all: network framework_builder molecule_to_abstract
 
 include Makefile.dep
 
 depend:
 	$(CC) -MG $(CFLAGS) -MM $(SRC) | sed 's/voro++\.hh //g' > Makefile.dep
 
-network: ${OBJS} ${MAIN_OBJ}
-	@echo
-	@echo Linking $@
-	$(CC) $(VOROINCLDIR) $(VOROLINKDIR) -o $@ $(CFLAGS) ${OBJS} ${MAIN_OBJ} $(LIB)
+voropp:
+	$(MAKE) -C voro++
 
-framework_builder: ${OBJS} ${FB_OBJ}
+zeopp: voropp ${OBJS} ${MAIN_OBJ}
 	@echo
 	@echo Linking $@
-	$(CC) $(VOROINCLDIR) $(VOROLINKDIR) -o $@ $(CFLAGS) ${OBJS} ${FB_OBJ} $(LIB)
+	$(CC) $(VOROINCLDIR) -o $@ $(CFLAGS) ${OBJS} ${MAIN_OBJ} $(LIB)
 
-molecule_to_abstract: ${OBJS} ${MTA_OBJ}
-	@echo
-	@echo Linking $@
-	$(CC) $(VOROINCLDIR) $(VOROLINKDIR) -o $@ $(CFLAGS) ${OBJS} ${MTA_OBJ} $(LIB)
+# framework_builder: ${OBJS} ${FB_OBJ}
+# 	@echo
+# 	@echo Linking $@
+# 	$(CC) $(VOROINCLDIR) $(VOROLINKDIR) -o $@ $(CFLAGS) ${OBJS} ${FB_OBJ} $(LIB)
+#
+# molecule_to_abstract: ${OBJS} ${MTA_OBJ}
+# 	@echo
+# 	@echo Linking $@
+# 	$(CC) $(VOROINCLDIR) $(VOROLINKDIR) -o $@ $(CFLAGS) ${OBJS} ${MTA_OBJ} $(LIB)
 
 statlib: ${STATIC_LIB}
 ${STATIC_LIB}: ${STATIC_OBJS}
@@ -137,7 +140,7 @@ ${STATIC_LIB}: ${STATIC_OBJS}
 	@echo Linking $@
 	ar rs $@ $^ #$(VOROINCLDIR) $(VOROLINKDIR) $(LIB)
 
-dylib: CFLAGS += -fPIC 
+dylib: CFLAGS += -fPIC
 dylib: ${DY_LIB}
 
 ${DY_LIB}: ${DY_OBJS}
@@ -148,8 +151,8 @@ ${DY_LIB}: ${DY_OBJS}
 %.o: %.cc
 	$(CC) $(VOROINCLDIR) $(CFLAGS) -c $<
 
-clean: 
-	rm -f $(TOT_OBJS) *.err $(EXECUTABLES)
+clean:
+	rm -f $(TOT_OBJS) *.err zeopp
+	$(MAKE) -C voro++ clean
 
 .PHONY: all clean depend
-
