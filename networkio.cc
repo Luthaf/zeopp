@@ -36,7 +36,7 @@ void parseFilename(const char * fileName, char *name, char *extension){
   }
 }
 
-/** Ensures that the provided file is of type .arc, .car, .cuc, .cssr or .v1 or .cif. 
+/** Ensures that the provided file is of type .arc, .car, .cuc, .cssr or .v1 or .cif.
  *  Otherwise, an error message is displayed and the program is
  *  aborted. */
 bool checkInputFile(char * filename){
@@ -80,8 +80,8 @@ bool readCIFFile(char *filename, ATOM_NETWORK *cell, bool radial){
 			 "_atom_site_Cartn_x", //17
 			 "_atom_site_Cartn_y", //18
 			 "_atom_site_Cartn_z", //19
-                         "_symmetry_equiv_pos_site_id", // 20 
-			 "NULL"};  
+                         "_symmetry_equiv_pos_site_id", // 20
+			 "NULL"};
   int ndx;
   vector<string> list = strAry2StrVec(descriptor);
   vector<string> token;
@@ -98,7 +98,7 @@ bool readCIFFile(char *filename, ATOM_NETWORK *cell, bool radial){
 
   int symmetry_Int_Table_number = -1; //set to dummy value so we can check if anything was read
   bool symmetry_equiv_pos_site_id_Flag = false; // this is to read symmetry lines from lines that have sym. id.
- 
+
   // Try opening the file if it opens proceed with processing
   ifstream ciffile;
   cout << "Opening File: " << filename << endl;
@@ -233,8 +233,8 @@ printf("\n#####\n##### WARNING: parsed a loop in cif file, but data was not pres
                 case 20:
                       symmetry_equiv_pos_site_id_Flag = true;
                       break;
-                }	 
-              }  
+                }
+              }
               //now we've finished parsing this line, we might need to convert Cartesian to fractional coords
               if(need_to_convert_to_fractional) {
                 Point tempcoor;
@@ -253,9 +253,9 @@ printf("\n#####\n##### WARNING: parsed a loop in cif file, but data was not pres
         }
         token.clear();
       }
-    }	  
+    }
     ciffile.close();
-    
+
     //If no symmetry info was provided, we can assume that none is required (i.e., structure has 'P 1' symmetry), ONLY IF we did not read a symmetry_Int_Tables_Number!=1
     if (sym_x.size()==0 || sym_y.size()==0 || sym_z.size()==0){
       //no symmetry provided
@@ -290,7 +290,7 @@ printf("\n#####\n##### WARNING: parsed a loop in cif file, but data was not pres
 	      }
       }
     }
-    
+
     //Error checking
     if (sym_x.size()==0 || sym_y.size()==0 || sym_z.size()==0 ){
       cerr << "Error: No .cif symmetry information given" << endl;
@@ -319,10 +319,10 @@ printf("\n#####\n##### WARNING: parsed a loop in cif file, but data was not pres
     if (cell->name.size() == 0){
       cell->name = *filename;
     }
-    
+
     //Now to fully assemble the ATOM_NETWORK initialize constructor
 //    cell->initialize(); //this should now happen much earlier, during parsing
-    
+
     ATOM tempatom;
     Point tempcoor;
     for (unsigned int i=0; i<atom_x.size(); i++){ //atoms
@@ -341,11 +341,11 @@ printf("\n#####\n##### WARNING: parsed a loop in cif file, but data was not pres
 	      tempatom.b_coord = trans_to_origuc(symbCalc(sym_y[j],atom_x[i],atom_y[i],atom_z[i]));
 	      tempatom.c_coord = trans_to_origuc(symbCalc(sym_z[j],atom_x[i],atom_y[i],atom_z[i]));
 	      tempcoor = cell->abc_to_xyz (tempatom.a_coord,tempatom.b_coord,tempatom.c_coord);
-	      tempatom.x = tempcoor[0]; 
-	      tempatom.y = tempcoor[1]; 
+	      tempatom.x = tempcoor[0];
+	      tempatom.y = tempcoor[1];
 	      tempatom.z = tempcoor[2];
 	      tempatom.specialID = (i*sym_x.size())+j;
-	
+
 	      //make sure that no duplicate atoms are writen
 	      int match=1;
 	      for (unsigned int k=0;k<cell->atoms.size(); k++){
@@ -494,7 +494,7 @@ bool readARCFile(char *filename, ATOM_NETWORK *cell, bool radial){
     cell->initMatrices();
     cell->name = filename;
     cell->name.erase(cell->name.end()-4, cell->name.end());
-    
+
 //   cout << "number of atoms read " << numAtoms << "\n";
 
     // Convert atom coords to abc and update the xyz values to be within the UC
@@ -545,7 +545,7 @@ bool readCUCFile(char *filename, ATOM_NETWORK *cell, bool radial){
       input >> newAtom.type;
       if(newAtom.type.empty())
 	break;
-      
+
       changeAtomType(&newAtom); // Converts to atom type
       input >> newAtom.a_coord >> newAtom.b_coord >> newAtom.c_coord;
       newAtom.a_coord = trans_to_origuc(newAtom.a_coord);
@@ -557,8 +557,8 @@ bool readCUCFile(char *filename, ATOM_NETWORK *cell, bool radial){
       newAtom.label=newAtom.type;
       cell->atoms.push_back(newAtom);
       numAtoms++;
-    }   
-    cell->numAtoms= numAtoms; 
+    }
+    cell->numAtoms= numAtoms;
     input.close();
   }
   return true;
@@ -575,14 +575,18 @@ bool readCSSRFile(char *filename, ATOM_NETWORK *cell, bool radial){
   input.open(filename);
   if(input.is_open()==true){
     // Read the header information
-    cout << "Reading input file: " << filename << endl;;
+    cout << "Reading input file: " << filename << endl;
+    input.ignore(38);
     input >> cell->a >> cell->b >> cell->c;
+    getline(input,garbage);
+
+    input.ignore(21);
     input >> cell->alpha >> cell->beta >> cell->gamma;
     getline(input,garbage);
 
     string numStr;
     bool longCSSR=false;  // this flag wiill enable switching to a different read routine
-                          // to handle files with number of atoms larger than 10000 
+                          // to handle files with number of atoms larger than 10000
     bool CartCoords=false; // this flag enables reading Cartesian coordinates
 
     input >> numStr >> CartCoords;
@@ -597,7 +601,7 @@ bool readCSSRFile(char *filename, ATOM_NETWORK *cell, bool radial){
 
     if(longCSSR == false){
       cell->numAtoms = atoi(numStr.c_str());
-    
+
       // Read and store information about each atom
       for(j=0;j<cell->numAtoms;j++) {
         ATOM newAtom;
@@ -619,7 +623,7 @@ bool readCSSRFile(char *filename, ATOM_NETWORK *cell, bool radial){
            newCoords=cell->abc_to_xyz(newAtom.a_coord,newAtom.b_coord,newAtom.c_coord);
            newAtom.x=newCoords[0]; newAtom.y=newCoords[1]; newAtom.z=newCoords[2];
            };
-         
+
         newAtom.radius=lookupRadius(newAtom.type, radial);
         cell->atoms.push_back(newAtom);
 //        getline(input,garbage);
@@ -637,7 +641,7 @@ bool readCSSRFile(char *filename, ATOM_NETWORK *cell, bool radial){
         ATOM newAtom;
         newAtom.specialID = na;
         input >> garbage;
-        if(input.eof()) 
+        if(input.eof())
           {
           na--;
           break;
@@ -687,7 +691,7 @@ bool readCSSRFile(char *filename, ATOM_NETWORK *cell, bool radial){
 
 
 /** Read the information from the .obcssr file referred to by filename
-    and store it within the provided ATOM_NETWORK. 
+    and store it within the provided ATOM_NETWORK.
     obcssr are Open Babel generated cssr files  */
 bool readOBCSSRFile(char *filename, ATOM_NETWORK *cell, bool radial){
   string garbage; //this is a garbage string to read line
@@ -698,7 +702,7 @@ bool readOBCSSRFile(char *filename, ATOM_NETWORK *cell, bool radial){
   if(input.is_open()==true){
     // Read the header information
     cout << "Reading input file: " << filename << endl;;
-    for(int i=0; i<6; i++) input >> garbage; 
+    for(int i=0; i<6; i++) input >> garbage;
     input >> cell->a >> cell->b >> cell->c;
     getline(input,garbage);
     input >> garbage >> garbage;
@@ -707,10 +711,10 @@ bool readOBCSSRFile(char *filename, ATOM_NETWORK *cell, bool radial){
 
     string numStr;
     bool longCSSR=false;  // this flag wiill enable switching to a different read routine
-                          // to handle files with number of atoms larger than 10000 
+                          // to handle files with number of atoms larger than 10000
     bool CartCoords=false; // this flag enables reading Cartesian coordinates
 
-    cout << "Attempt to read OpenBabel CSSR file. Atom connectivity and charge columns will be omitted" << endl; 
+    cout << "Attempt to read OpenBabel CSSR file. Atom connectivity and charge columns will be omitted" << endl;
 
     input >> numStr >> CartCoords;
     getline(input,garbage);
@@ -724,7 +728,7 @@ bool readOBCSSRFile(char *filename, ATOM_NETWORK *cell, bool radial){
 
     if(longCSSR == false){
       cell->numAtoms = atoi(numStr.c_str());
-    
+
       // Read and store information about each atom
       for(j=0;j<cell->numAtoms;j++) {
         ATOM newAtom;
@@ -746,7 +750,7 @@ bool readOBCSSRFile(char *filename, ATOM_NETWORK *cell, bool radial){
            newCoords=cell->abc_to_xyz(newAtom.a_coord,newAtom.b_coord,newAtom.c_coord);
            newAtom.x=newCoords[0]; newAtom.y=newCoords[1]; newAtom.z=newCoords[2];
            };
-         
+
         newAtom.radius=lookupRadius(newAtom.type, radial);
         cell->atoms.push_back(newAtom);
 //uncommented the following line to reads Marcos files
@@ -772,7 +776,7 @@ bool readOBCSSRFile(char *filename, ATOM_NETWORK *cell, bool radial){
         ATOM newAtom;
         newAtom.specialID = na;
         input >> garbage;
-        if(input.eof()) 
+        if(input.eof())
           {
           na--;
           break;
@@ -853,7 +857,7 @@ bool readCARFile(char *filename, ATOM_NETWORK *cell, bool radial){
     getline(input, garbage); // skipping two next lines
     getline(input, garbage);
 
-    input >> garbage; 
+    input >> garbage;
     input >> cell->a >> cell->b >> cell->c;
     input >> cell->alpha >> cell->beta >> cell->gamma;
     string SYMMline;
@@ -879,7 +883,7 @@ bool readCARFile(char *filename, ATOM_NETWORK *cell, bool radial){
 
       if(str1.compare("end") == 0 || str1.compare("END") == 0)
         {
-        end = true;  
+        end = true;
         } else
         {
         ATOM newAtom;
@@ -912,7 +916,7 @@ bool readCARFile(char *filename, ATOM_NETWORK *cell, bool radial){
 }
 
 /** Read the information from the .pdb file referred to by filename
-    and store it within the provided ATOM_NETWORK. 
+    and store it within the provided ATOM_NETWORK.
     This function is written to handle example .pdb files from RASPA
  */
 bool readPDBFile(char *filename, ATOM_NETWORK *cell, bool radial){
@@ -928,7 +932,7 @@ bool readPDBFile(char *filename, ATOM_NETWORK *cell, bool radial){
 
     string PBCline;
 
-    input >> PBCline; 
+    input >> PBCline;
     if(PBCline.compare("CRYST1") != 0)
       {
       cerr << "This .pdb files does not contain CRYST1 in the second line. File format not compatible. Exiting...\n";
@@ -952,7 +956,7 @@ bool readPDBFile(char *filename, ATOM_NETWORK *cell, bool radial){
 
       if(str1.compare("ENDMDL") == 0)
         {
-        end = true;  
+        end = true;
         } else
         {
         ATOM newAtom;
@@ -1009,20 +1013,20 @@ bool readV1File(char *filename, ATOM_NETWORK *cell, bool radial){
     // vector components are known, the side lengths and angles remain unknown
     input >> garbage >> cell->v_a.x >> cell->v_a.y >> cell->v_a.z;
     input >> garbage >> cell->v_b.x >> cell->v_b.y >> cell->v_b.z;
-    input >> garbage >> cell->v_c.x >> cell->v_c.y >> cell->v_c.z; 
+    input >> garbage >> cell->v_c.x >> cell->v_c.y >> cell->v_c.z;
     input >> cell->numAtoms;
     cell->initMatrices();
 
     //Recover information about unit cell angles and side lengths from
     //vector components. Essentially reverses the steps performed in
     //the initialize() method for ATOM_NETWORK instances as contained
-    //in the file networkstorage.cc 
+    //in the file networkstorage.cc
     cell->a = cell->v_a.x;
     cell->b = sqrt(cell->v_b.x*cell->v_b.x+cell->v_b.y*cell->v_b.y);
     cell->c = sqrt(cell->v_c.x*cell->v_c.x+cell->v_c.y*cell->v_c.y+cell->v_c.z*cell->v_c.z);
     cell->beta = acos(cell->v_c.x/cell->c)*360.0/(2.0*PI);
     cell->gamma = acos(cell->v_b.x/cell->b)*360.0/(2.0*PI);
-    cell->alpha = 360.0/(2*PI)*acos((cell->v_c.y/cell->c*sin(2.0*PI*cell->gamma/360.0)) 
+    cell->alpha = 360.0/(2*PI)*acos((cell->v_c.y/cell->c*sin(2.0*PI*cell->gamma/360.0))
 				    +cos(2.0*PI/360.0*cell->gamma)*cos(2.0*PI/360.0*cell->beta));
 
     // Read and store information about each atom. The coordinates
@@ -1034,7 +1038,7 @@ bool readV1File(char *filename, ATOM_NETWORK *cell, bool radial){
       newAtom.a_coord = trans_to_origuc(abcCoords[0]); newAtom.b_coord = trans_to_origuc(abcCoords[1]); newAtom.c_coord = trans_to_origuc(abcCoords[2]);
       newAtom.radius = lookupRadius(newAtom.type, radial);
       cell->atoms.push_back(newAtom);
-    }    
+    }
     input.close();
   }
   return true;
@@ -1042,7 +1046,7 @@ bool readV1File(char *filename, ATOM_NETWORK *cell, bool radial){
 
 
 /** Read the information from the .pld file referrred to by filename
-    and store it within the provided ATOM_NETWORK. 
+    and store it within the provided ATOM_NETWORK.
     .dlp is a frame from DL_poly HISTORY file */
 bool readDLPFile(char *filename, ATOM_NETWORK *cell, bool radial){
   fstream input;
@@ -1064,20 +1068,20 @@ bool readDLPFile(char *filename, ATOM_NETWORK *cell, bool radial){
     input >> cell->v_a.x >> cell->v_a.y >> cell->v_a.z;
     input >> cell->v_b.x >> cell->v_b.y >> cell->v_b.z;
     input >> cell->v_c.x >> cell->v_c.y >> cell->v_c.z;
-     
+
 //    input >> cell->numAtoms;
     cell->initMatrices();
 
     //Recover information about unit cell angles and side lengths from
     //vector components. Essentially reverses the steps performed in
     //the initialize() method for ATOM_NETWORK instances as contained
-    //in the file networkstorage.cc 
+    //in the file networkstorage.cc
     cell->a = cell->v_a.x;
     cell->b = sqrt(cell->v_b.x*cell->v_b.x+cell->v_b.y*cell->v_b.y);
     cell->c = sqrt(cell->v_c.x*cell->v_c.x+cell->v_c.y*cell->v_c.y+cell->v_c.z*cell->v_c.z);
     cell->beta = acos(cell->v_c.x/cell->c)*360.0/(2.0*PI);
     cell->gamma = acos(cell->v_b.x/cell->b)*360.0/(2.0*PI);
-    cell->alpha = 360.0/(2*PI)*acos((cell->v_c.y/cell->c*sin(2.0*PI*cell->gamma/360.0)) 
+    cell->alpha = 360.0/(2*PI)*acos((cell->v_c.y/cell->c*sin(2.0*PI*cell->gamma/360.0))
 				    +cos(2.0*PI/360.0*cell->gamma)*cos(2.0*PI/360.0*cell->beta));
 
     // Read and store information about each atom
@@ -1087,7 +1091,7 @@ bool readDLPFile(char *filename, ATOM_NETWORK *cell, bool radial){
       input >> newAtom.type;
       if(newAtom.type.empty())
 	break;
-	      
+
       input.getline(garbage,256); // reading remaining data from a line
 
       input >> newAtom.x >> newAtom.y >> newAtom.z;
@@ -1101,8 +1105,8 @@ bool readDLPFile(char *filename, ATOM_NETWORK *cell, bool radial){
       newAtom.radius = lookupRadius(newAtom.type, radial);
       cell->atoms.push_back(newAtom);
       numAtoms++;
-    }   
-    cell->numAtoms= numAtoms; 
+    }
+    cell->numAtoms= numAtoms;
 
     input.close();
   }
@@ -1111,24 +1115,24 @@ bool readDLPFile(char *filename, ATOM_NETWORK *cell, bool radial){
 
 
 
-/** Read the VORONOI_NETWORK information located in the provided input stream and 
+/** Read the VORONOI_NETWORK information located in the provided input stream and
  *  store it using the provided VORONOI_NETWORK pointer. The input stream must have a file format
  *  corresponding to a .net or .nt2 format. */
 void readNet(istream *input, VORONOI_NETWORK *vornet){
   char buff [256];
   input->getline(buff,256); // Read line "Vertex table:"
-  VOR_NODE node; 
+  VOR_NODE node;
   string garbage;
-  
+
   // Read information about each Voronoi node
   int i = 0;
   while(true){
     (*input) >> garbage;
     if(strcmp(garbage.data(), "Edge") == 0)
       break;
-    
+
     (*input) >> node.x >> node.y >> node.z >> node.rad_stat_sphere;
-    
+
     // Read node connectivity information
     char *connectBuff = new char [256];
     char *origBuff = connectBuff;
@@ -1136,7 +1140,7 @@ void readNet(istream *input, VORONOI_NETWORK *vornet){
     connectBuff+= 1; //Skip space character
     char *currentChar = connectBuff;
     vector<int> nearestAtoms;
-    
+
     while(true){
       if(*currentChar == ' ' || *currentChar == '\0'){
 	char nextID[256];
@@ -1148,29 +1152,29 @@ void readNet(istream *input, VORONOI_NETWORK *vornet){
       if(*currentChar == '\0')
 	break;
       currentChar++;
-    } 
+    }
 
     delete [] origBuff;
     node.atomIDs = nearestAtoms;
     vornet->nodes.push_back(node);
     i++;
   }
-  
+
   input->getline(buff,256); // Reads remainder of line "Edge table:"
-  
+
   //Read information about each Voronoi edge
   VOR_EDGE edge;
   while(!input->eof()){
-    (*input) >> edge.from >> garbage >> edge.to >> edge.rad_moving_sphere  
+    (*input) >> edge.from >> garbage >> edge.to >> edge.rad_moving_sphere
 	     >> edge.delta_uc_x >> edge.delta_uc_y >> edge.delta_uc_z >> edge.length;
     vornet->edges.push_back(edge);
   }
   vornet->edges.pop_back();
 }
 
-/* Read the VORONOI_NETWORK located in the provided file and store 
- * it using the provided network pointer. The file must be in the .net/.nt2 
- * file format. */ 
+/* Read the VORONOI_NETWORK located in the provided file and store
+ * it using the provided network pointer. The file must be in the .net/.nt2
+ * file format. */
 //void readNetFile(char * filename, VORONOI_NETWORK *vornet){
 bool readNetFile(char * filename, VORONOI_NETWORK *vornet){
   fstream input;
@@ -1200,7 +1204,7 @@ bool writeToCSSR(char *filename, ATOM_NETWORK *cell){
   }
   else{
     cout   << "Writing atom network information to " << filename << "\n";
-    
+
     // Write information about the unit cell
     output << "\t\t\t\t" << cell->a << "  " << cell->b << "  " << cell->c << "\n";
     output << "\t\t" << cell->alpha<<"  "<< cell->beta <<"  " << cell->gamma <<"  SPGR =  1 P 1\t\t OPT = 1" << "\n";
@@ -1209,7 +1213,7 @@ bool writeToCSSR(char *filename, ATOM_NETWORK *cell){
     output.setf(ios::fixed, ios::floatfield);
     int i;
     ATOM atm;
-    
+
     // Write information about each atom
     for(i = 0; i<cell->numAtoms; i++){
       atm = cell->atoms.at(i);
@@ -1320,7 +1324,7 @@ bool writeToCIF(char *filename,  ATOM_NETWORK *cell){
     output << "# analyze microporous materials" << endl;
     output << "#" << endl;
     output << "#*******************************************" << "\n\n";
-    output << "_cell_length_a\t\t" << cell->a << "   " << endl;     //  removed (0) 
+    output << "_cell_length_a\t\t" << cell->a << "   " << endl;     //  removed (0)
     output << "_cell_length_b\t\t" << cell->b << "   " << endl;
     output << "_cell_length_c\t\t" << cell->c << "   " << endl;
     output << "_cell_angle_alpha\t\t" << cell->alpha << "   " << endl;
@@ -1329,7 +1333,7 @@ bool writeToCIF(char *filename,  ATOM_NETWORK *cell){
     output << "_symmetry_space_group_name_H-M\t\t" << "'P1'" << endl;
     output << "_symmetry_Int_Tables_number\t\t" << "1" << endl;
     output << "_symmetry_cell_setting\t\t";
-    
+
     //Determine the Crystal System
     if (cell->alpha == 90 && cell->beta == 90 && cell->gamma == 90){
       if (cell->a == cell->b || cell->b == cell->c || cell->a == cell->c){
@@ -1350,7 +1354,7 @@ bool writeToCIF(char *filename,  ATOM_NETWORK *cell){
     else{
       output << "Triclinic\n" << endl;
     }
-    
+
     output << "loop_" << endl;
     output << "_symmetry_equiv_pos_as_xyz" << endl;
     output << "'+x,+y,+z'\n" << endl;
@@ -1391,7 +1395,7 @@ bool writeToV1(char * filename, ATOM_NETWORK *cell){
     output << "vb= " << cell->v_b.x << " " << cell->v_b.y << " " << cell->v_b.z << "\n";
     output << "vc= " << cell->v_c.x << " " << cell->v_c.y << " " << cell->v_c.z << "\n";
     output << cell->numAtoms << "\n";
-    
+
     // Write information about each atom
     vector <ATOM> ::iterator iter = cell->atoms.begin();
     while(iter != cell->atoms.end()){
@@ -1417,16 +1421,16 @@ bool writeToNt2(char *filename, VORONOI_NETWORK *vornet, double minRad){
   }
   else{
     cout << "Writing Voronoi network information to " << filename << "\n";
-  
+
     // Write Voronoi node information
     output << "Vertex table:" << "\n";
     vector<VOR_NODE> ::iterator niter = vornet->nodes.begin();
     int i = 0;
     while(niter != vornet->nodes.end()){
       if(niter->rad_stat_sphere > minRad){
-	output << i << " " << niter-> x << " " << niter-> y << " " 
+	output << i << " " << niter-> x << " " << niter-> y << " "
 	       << niter-> z << " " << niter->rad_stat_sphere;
-      
+
 	//Write Voronoi node/atom pairing information in i j k....z format
 	output << " ";
 	for(unsigned int j = 0; j < niter->atomIDs.size(); j++){
@@ -1456,7 +1460,7 @@ bool writeToNt2(char *filename, VORONOI_NETWORK *vornet, double minRad){
   return true;
 }
 
-/** Write the voronoi noide information within the VORONOI_NETWORK in .xyz 
+/** Write the voronoi noide information within the VORONOI_NETWORK in .xyz
     file format to the provided filename. Excludes any nodes with radii
     less than the provided threshold. For the default 0, all nodes are included*/
 bool writeToXYZ(char *filename, VORONOI_NETWORK *vornet, double minRad){
@@ -1468,17 +1472,17 @@ bool writeToXYZ(char *filename, VORONOI_NETWORK *vornet, double minRad){
     }
     else{
         cout << "Writing Voronoi network information to " << filename << "\n";
-        
+
         // Write Voronoi node information
         //Compute the # of nodes to be written
         int i = 0;
-        for (vector<VOR_NODE>::const_iterator iter = vornet->nodes.begin(); 
+        for (vector<VOR_NODE>::const_iterator iter = vornet->nodes.begin();
                 iter != vornet->nodes.end(); iter++)
             if (iter->rad_stat_sphere > minRad){
                 i++;
             }
         output << i << "\n\n";
-        for (vector<VOR_NODE>::const_iterator iter = vornet->nodes.begin(); 
+        for (vector<VOR_NODE>::const_iterator iter = vornet->nodes.begin();
                 iter != vornet->nodes.end(); iter++)
             if (iter->rad_stat_sphere > minRad)
                 output << "X  " << iter->x << " " << iter->y << " "
@@ -1705,7 +1709,7 @@ bool writeToMOPAC(char *filename, ATOM_NETWORK *cell, bool is_supercell){
           }
         }
       }
-    }      
+    }
 
     //Write unit cell box information
     output << "Tv " << cell->v_a.x*num_cells << " +1 ";
@@ -1714,7 +1718,7 @@ bool writeToMOPAC(char *filename, ATOM_NETWORK *cell, bool is_supercell){
 
     output << "Tv ";
     if(cell->v_b.x==0.0) { output << " 0.0 0 "; } else { output << cell->v_b.x*num_cells << " +1 ";};
-    output << cell->v_b.y*num_cells << " +1 ";    
+    output << cell->v_b.y*num_cells << " +1 ";
     if(cell->v_b.z==0.0) { output << " 0.0 0 \n"; } else { output << cell->v_b.z*num_cells << " +1 \n";};
 
     output << "Tv ";
